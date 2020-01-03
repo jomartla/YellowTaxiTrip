@@ -13,12 +13,14 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * In this class the JFK airport trips program has to be implemented.
  */
 public class JFKAlarms {
-/*
+
     private static final int MIN_PASSENGER_COUNT = 2;
 
     public static SingleOutputStreamOperator<JFKAlarmEvent> run(SingleOutputStreamOperator<TripEvent> stream) {
@@ -27,7 +29,7 @@ public class JFKAlarms {
                 .assignTimestampsAndWatermarks(new AscendingTimestampExtractor<TripEvent>() {
                     @Override
                     public long extractAscendingTimestamp(TripEvent tripEvent) {
-                        return tripEvent.get_tpep_dropoff_datetime().getTime();
+                        return tripEvent.get_tpep_dropoff_datetime().getTime()*1000;
                     }
                 })
                 .keyBy(new KeySelector<TripEvent, JFKAlarmKey>() {
@@ -50,50 +52,44 @@ public class JFKAlarms {
 
     private static class JFKAlarmWindow implements WindowFunction<TripEvent, JFKAlarmEvent, JFKAlarmKey, TimeWindow> {
 
-        private JFKAlarmEvent avgSpeedEvent = new JFKAlarmEvent();
+        private JFKAlarmEvent jfkAlarmEvent = new JFKAlarmEvent();
 
         @Override
         public void apply(JFKAlarmKey key, TimeWindow timeWindow,
                           Iterable<TripEvent> iterable,
                           Collector<JFKAlarmEvent> collector) throws Exception {
 
-            Timestamp pickupDatetime = Timestamp.valueOf("2007-09-23 10:10:10.0");
-            Timestamp dropoffDatetime = new Timestamp();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
+            Date pickupParsedDate = dateFormat.parse("9999-00-0 00:00:00");
+            Timestamp pickupTimestamp = new java.sql.Timestamp(pickupParsedDate.getTime());
 
-            int pos1 = Integer.MAX_VALUE;
+            Date dropoffParsedDate = dateFormat.parse("0000-00-0 00:00:00");
+            Timestamp dropoffTimestamp = new java.sql.Timestamp(dropoffParsedDate.getTime());
 
-            int time2 = 0;
-            int pos2 = 0;
+            int passenger_count = 0;
 
             for (TripEvent e : iterable) {
-                int currentTime = e.f0;
-                int currentPos = e.f7;
-                completedSegments |= 1 << (56 - e.f6);
-                time1 = Math.min(time1, currentTime);
-                pos1 = Math.min(pos1, currentPos);
-                time2 = Math.max(time2, currentTime);
-                pos2 = Math.max(pos2, currentPos);
-            }
+                Timestamp currentPickupTimestamp = e.f1;
+                Timestamp currentDropoffTimestamp = e.f2;
 
-            boolean completed = false;
-            if (completedSegments == 0b11111)
-                completed = true;
-
-            if (completed) {
-                double avgSpeed = (pos2 - pos1) * 1.0 / (time2 - time1) * 2.23694;
-                if (avgSpeed > 60) {
-                    avgSpeedEvent.setEntryTime(time1);
-                    avgSpeedEvent.setExitTime(time2);
-                    avgSpeedEvent.setVid(key.f0);
-                    avgSpeedEvent.setHighway(key.f1);
-                    avgSpeedEvent.setDirection(key.f2);
-                    avgSpeedEvent.setAvgSpeed(avgSpeed);
-                    collector.collect(avgSpeedEvent);
+                if(currentPickupTimestamp.before(pickupTimestamp))
+                {
+                    pickupTimestamp = currentPickupTimestamp;
                 }
+                if(currentDropoffTimestamp.after(dropoffTimestamp))
+                {
+                    dropoffTimestamp = currentDropoffTimestamp;
+                }
+
+                passenger_count = passenger_count + e.f3;
             }
+
+            jfkAlarmEvent.set_VendorID(key.f0);
+            jfkAlarmEvent.set_tpep_pickup_datetime(pickupTimestamp);
+            jfkAlarmEvent.set_tpep_dropoff_datetime(dropoffTimestamp);
+            jfkAlarmEvent.set_passenger_count(passenger_count);
+            collector.collect(jfkAlarmEvent);
         }
     }
-
- */
 }
