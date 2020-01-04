@@ -2,13 +2,10 @@ package master2019.flink.YellowTaxiTrip;
 
 import master2019.flink.YellowTaxiTrip.events.JFKAlarmEvent;
 import master2019.flink.YellowTaxiTrip.events.TripEvent;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -31,7 +28,7 @@ public class JFKAlarms {
                 .assignTimestampsAndWatermarks(new AscendingTimestampExtractor<TripEvent>() {
                     @Override
                     public long extractAscendingTimestamp(TripEvent tripEvent) {
-                        return (tripEvent.get_tpep_pickup_datetime().getTime()/10000000)*10000000;
+                        return (tripEvent.get_tpep_pickup_datetime().getTime());
                     }
                 })
                 /*
@@ -48,9 +45,8 @@ public class JFKAlarms {
                 })
                  */
                 .keyBy(0)
-                .window(TumblingEventTimeWindows.of(Time.seconds(3600)))
+                .window(TumblingEventTimeWindows.of(Time.hours(1)))
                 .apply(new JFKAlarmWindow());
-
     }
 
     //private static class JFKAlarmKey extends Tuple2<Integer,Long>{}
