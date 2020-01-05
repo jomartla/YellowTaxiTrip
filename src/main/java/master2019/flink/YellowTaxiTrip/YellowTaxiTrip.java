@@ -27,7 +27,8 @@ public class YellowTaxiTrip {
         SingleOutputStreamOperator<String> rowsSource = env.readTextFile(params.get("input"));
         SingleOutputStreamOperator<TripEvent> mappedRows = rowsSource.map(new Tokenizer());
 
-        //JFKAlarms.run(mappedRows).writeAsCsv(String.format("%s/%s",params.get("output"),JFK_ALARMS_FILE),org.apache.flink.core.fs.FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+        JFKAlarms.run(mappedRows)
+                .writeAsCsv(String.format("%s/%s",params.get("output"),JFK_ALARMS_FILE),org.apache.flink.core.fs.FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
         LargeTrips.run(mappedRows)
                 .writeAsCsv(String.format("%s/%s",params.get("output"),LARGE_TRIPS_FILE),org.apache.flink.core.fs.FileSystem.WriteMode.OVERWRITE).setParallelism(1);
