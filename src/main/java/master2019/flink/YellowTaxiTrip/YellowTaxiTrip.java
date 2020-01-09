@@ -2,43 +2,13 @@ package master2019.flink.YellowTaxiTrip;
 
 import master2019.flink.YellowTaxiTrip.events.TripEvent;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
 public class YellowTaxiTrip {
 
-    public static final String JFK_ALARMS_FILE = "jfkAlarms.csv";
-    public static final String LARGE_TRIPS_FILE = "largeTrips.csv";
-
-    public static void main(String[] args) throws Exception {
-
-        final ParameterTool params = ParameterTool.fromArgs(args);
-
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-
-        SingleOutputStreamOperator<String> rowsSource = env.readTextFile(params.get("input"));
-        SingleOutputStreamOperator<TripEvent> mappedRows = rowsSource.map(new Tokenizer());
-
-        JFKAlarms.run(mappedRows)
-                .writeAsCsv(String.format("%s/%s",params.get("output"),JFK_ALARMS_FILE),org.apache.flink.core.fs.FileSystem.WriteMode.OVERWRITE).setParallelism(1);
-
-        LargeTrips.run(mappedRows)
-                .writeAsCsv(String.format("%s/%s",params.get("output"),LARGE_TRIPS_FILE),org.apache.flink.core.fs.FileSystem.WriteMode.OVERWRITE).setParallelism(1);
-
-        env.execute("Yellow Taxi Trip");
-    }
-
     public static final class Tokenizer implements MapFunction<String, TripEvent> {
-
-        private static final long serialVersionUID = 1L;
 
         TripEvent event = new TripEvent();
 

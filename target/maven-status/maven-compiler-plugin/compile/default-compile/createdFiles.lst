@@ -1,0 +1,11 @@
+master2019/flink/YellowTaxiTrip/JFKAlarms$JFKAlarmWindow.class
+master2019/flink/YellowTaxiTrip/events/TripEvent.class
+master2019/flink/YellowTaxiTrip/YellowTaxiTrip.class
+master2019/flink/YellowTaxiTrip/LargeTrips$1.class
+master2019/flink/YellowTaxiTrip/events/LargeTripsEvent.class
+master2019/flink/YellowTaxiTrip/JFKAlarms.class
+master2019/flink/YellowTaxiTrip/YellowTaxiTrip$Tokenizer.class
+master2019/flink/YellowTaxiTrip/JFKAlarms$1.class
+master2019/flink/YellowTaxiTrip/events/JFKAlarmEvent.class
+master2019/flink/YellowTaxiTrip/LargeTrips.class
+master2019/flink/YellowTaxiTrip/LargeTrips$LargeTripsWindow.class
